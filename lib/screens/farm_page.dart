@@ -66,7 +66,6 @@ class _FarmPageState extends State<FarmPage> {
                 ),
               ],
             ),
-
             if (isSelected)
               const Positioned(
                 top: 3,
@@ -135,14 +134,11 @@ class _FarmPageState extends State<FarmPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // App Bar
       appBar: AppBar(
         title: const Text('Zaree 🌱'),
         backgroundColor: const Color(0xFF2E7137),
         foregroundColor: Colors.white,
       ),
-
-      // Body
       body: Container(
         color: const Color(0xFFFFF8E9),
         child: Padding(
@@ -161,10 +157,8 @@ class _FarmPageState extends State<FarmPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
-                // Farmer Information
                 const Text(
                   'My Farm | أرضي 🌱',
                   style: TextStyle(
@@ -173,7 +167,6 @@ class _FarmPageState extends State<FarmPage> {
                     color: Color(0xFF24552D),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
                 // Farmer Name
@@ -182,7 +175,6 @@ class _FarmPageState extends State<FarmPage> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-
                 TextField(
                   controller: nameController,
                   decoration: InputDecoration(
@@ -195,7 +187,6 @@ class _FarmPageState extends State<FarmPage> {
                     prefixIcon: const Icon(Icons.person),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
                 // Location
@@ -204,7 +195,6 @@ class _FarmPageState extends State<FarmPage> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-
                 TextField(
                   controller: locationController,
                   decoration: InputDecoration(
@@ -217,7 +207,6 @@ class _FarmPageState extends State<FarmPage> {
                     prefixIcon: const Icon(Icons.location_on),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
                 // Land Area
@@ -226,7 +215,6 @@ class _FarmPageState extends State<FarmPage> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-
                 TextField(
                   controller: areaController,
                   keyboardType: TextInputType.number,
@@ -240,17 +228,14 @@ class _FarmPageState extends State<FarmPage> {
                     prefixIcon: const Icon(Icons.landscape),
                   ),
                 ),
-
                 const SizedBox(height: 20),
 
-                // Crop Selection Cards
+                // Crop Selection
                 const Text(
                   'Select Crop | اختر المحصول',
                   style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 ),
-
                 const SizedBox(height: 12),
-
                 Row(
                   children: [
                     Expanded(child: buildCropCard('Tomato', '🍅')),
@@ -264,15 +249,41 @@ class _FarmPageState extends State<FarmPage> {
                     Expanded(child: buildCropCard('Pepper', '🌶️')),
                   ],
                 ),
-
                 const SizedBox(height: 20),
 
                 // Soil Type
                 const Text(
                   'Soil Type | نوع التربة',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF24552D),
+                  ),
                 ),
                 const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  value: selectedSoil,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: const Icon(Icons.terrain),
+                  ),
+                  hint: const Text('Choose soil type'),
+                  items: ['Sandy Soil', 'Clay Soil', 'Loamy Soil'].map((soil) {
+                    return DropdownMenuItem<String>(
+                      value: soil,
+                      child: Text(soil),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedSoil = value;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
 
                 // Irrigation Method
                 const Text(
@@ -283,9 +294,7 @@ class _FarmPageState extends State<FarmPage> {
                     color: Color(0xFF24552D),
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -309,9 +318,7 @@ class _FarmPageState extends State<FarmPage> {
                           });
                         },
                       ),
-
                       const Divider(),
-
                       RadioListTile<String>(
                         value: 'Sprinkler Irrigation',
                         groupValue: selectedIrrigation,
@@ -327,44 +334,6 @@ class _FarmPageState extends State<FarmPage> {
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 20),
-
-                const SizedBox(height: 20),
-
-                // Irrigation Method
-                const Text(
-                  'Irrigation Method | طريقة الري',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-
-                DropdownButtonFormField<String>(
-                  value: selectedIrrigation,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.water_drop),
-                  ),
-                  hint: const Text('Choose irrigation method'),
-                  items: ['Drip Irrigation', 'Sprinkler Irrigation'].map((
-                    method,
-                  ) {
-                    return DropdownMenuItem<String>(
-                      value: method,
-                      child: Text(method),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedIrrigation = value;
-                    });
-                  },
-                ),
-
                 const SizedBox(height: 30),
 
                 // Create My Farm Button
@@ -389,7 +358,6 @@ class _FarmPageState extends State<FarmPage> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),
