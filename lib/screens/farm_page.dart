@@ -10,7 +10,9 @@ class FarmPage extends StatefulWidget {
 class _FarmPageState extends State<FarmPage> {
   // Text Controllers
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+  final TextEditingController detailedLocationController =
+      TextEditingController();
   final TextEditingController areaController = TextEditingController();
 
   // Selected Options
@@ -21,9 +23,16 @@ class _FarmPageState extends State<FarmPage> {
   @override
   void dispose() {
     nameController.dispose();
-    locationController.dispose();
+    cityController.dispose();
+    detailedLocationController.dispose();
     areaController.dispose();
     super.dispose();
+  }
+
+  // Show Error Message
+  void showError(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   // Crop Selection Card
@@ -84,36 +93,63 @@ class _FarmPageState extends State<FarmPage> {
 
   // Create Farm Function
   void createFarm() {
-    if (nameController.text.trim().isEmpty ||
-        locationController.text.trim().isEmpty ||
-        areaController.text.trim().isEmpty ||
-        selectedCrop == null ||
+    final farmerName = nameController.text.trim();
+    final city = cityController.text.trim();
+    final detailedLocation = detailedLocationController.text.trim();
+    final areaText = areaController.text.trim();
+
+    // Farmer Name Validation
+    if (farmerName.isEmpty ||
+        !RegExp(r'[a-zA-Z\u0600-\u06FF]').hasMatch(farmerName)) {
+      showError('Please enter a valid farmer name!');
+      return;
+    }
+
+    // City Validation
+    if (city.isEmpty) {
+      showError('Please enter your city or village!');
+      return;
+    }
+
+    // Detailed Location Validation
+    if (detailedLocation.isEmpty) {
+      showError('Please enter your area or street!');
+      return;
+    }
+
+    // Land Area Validation
+    if (areaText.isEmpty) {
+      showError('Please enter your land area!');
+      return;
+    }
+
+    final area = double.tryParse(areaText);
+
+    if (area == null || !area.isFinite || area <= 0) {
+      showError('Enter a valid positive area, such as 100 or 25.5!');
+      return;
+    }
+
+    // Crop, Soil and Irrigation Validation
+    if (selectedCrop == null ||
         selectedSoil == null ||
         selectedIrrigation == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all farm information!')),
-      );
+      showError('Please select crop, soil and irrigation method!');
       return;
     }
 
-    final area = double.tryParse(areaController.text.trim());
-
-    if (area == null || area <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid land area!')),
-      );
-      return;
-    }
-
+    // Successful Farm Creation
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Farm Created Successfully! 🌱'),
           content: Text(
-            'Farmer: ${nameController.text}\n'
-            'Location: ${locationController.text}\n'
-            'Land Area: ${areaController.text} m²\n'
+            'Farmer: $farmerName\n'
+            'Country: Lebanon\n'
+            'City / Village: $city\n'
+            'Area / Street: $detailedLocation\n'
+            'Land Area: $area m²\n'
             'Crop: $selectedCrop\n'
             'Soil: $selectedSoil\n'
             'Irrigation: $selectedIrrigation',
@@ -159,6 +195,7 @@ class _FarmPageState extends State<FarmPage> {
                 ),
                 const SizedBox(height: 20),
 
+                // My Farm Title
                 const Text(
                   'My Farm | أرضي 🌱',
                   style: TextStyle(
@@ -189,16 +226,58 @@ class _FarmPageState extends State<FarmPage> {
                 ),
                 const SizedBox(height: 20),
 
-                // Location
+                // Country
                 const Text(
-                  'Location | الموقع',
+                  'Country | البلد',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                InputDecorator(
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    prefixIcon: const Icon(Icons.flag),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text('Lebanon'),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // City or Village
+                const Text(
+                  'City / Village | المدينة أو القرية',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 TextField(
-                  controller: locationController,
+                  controller: cityController,
                   decoration: InputDecoration(
-                    hintText: 'Enter your location',
+                    hintText: 'Example: Tripoli',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: const Icon(Icons.location_city),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Detailed Location
+                const Text(
+                  'Area / Street | المنطقة أو الشارع',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: detailedLocationController,
+                  decoration: InputDecoration(
+                    hintText: 'Example: Dam w Farez, Street name',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -217,9 +296,12 @@ class _FarmPageState extends State<FarmPage> {
                 const SizedBox(height: 8),
                 TextField(
                   controller: areaController,
-                  keyboardType: TextInputType.number,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: InputDecoration(
-                    hintText: 'Enter land area in m²',
+                    hintText: 'Enter land area',
+                    suffixText: 'm²',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
