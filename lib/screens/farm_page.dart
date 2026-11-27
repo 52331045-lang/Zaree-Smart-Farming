@@ -274,29 +274,61 @@ class _FarmPageState extends State<FarmPage> {
                 ),
                 const SizedBox(height: 8),
 
-                DropdownButtonFormField<String>(
-                  value: selectedSoil,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.terrain),
+                // Irrigation Method
+                const Text(
+                  'Irrigation Method | طريقة الري',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Color(0xFF24552D),
                   ),
-                  hint: const Text('Choose soil type'),
-                  items: ['Sandy Soil', 'Clay Soil', 'Loamy Soil'].map((soil) {
-                    return DropdownMenuItem<String>(
-                      value: soil,
-                      child: Text(soil),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedSoil = value;
-                    });
-                  },
                 ),
+
+                const SizedBox(height: 10),
+
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF5DF),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFD8CBA8)),
+                  ),
+                  child: Column(
+                    children: [
+                      RadioListTile<String>(
+                        value: 'Drip Irrigation',
+                        groupValue: selectedIrrigation,
+                        activeColor: const Color(0xFF2E7137),
+                        title: const Text('Drip Irrigation'),
+                        subtitle: const Text(
+                          'Water delivered directly to plant roots',
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedIrrigation = value;
+                          });
+                        },
+                      ),
+
+                      const Divider(),
+
+                      RadioListTile<String>(
+                        value: 'Sprinkler Irrigation',
+                        groupValue: selectedIrrigation,
+                        activeColor: const Color(0xFF2E7137),
+                        title: const Text('Sprinkler Irrigation'),
+                        subtitle: const Text('Water sprayed over the crops'),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedIrrigation = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
 
                 const SizedBox(height: 20),
 
