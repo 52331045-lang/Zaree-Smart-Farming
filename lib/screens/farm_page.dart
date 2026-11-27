@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/farm_data.dart';
+
 class FarmPage extends StatefulWidget {
   const FarmPage({super.key});
 
@@ -195,7 +197,19 @@ class _FarmPageState extends State<FarmPage> {
       return;
     }
 
-    // Translated Values
+    // Create FarmData Object
+    final farmData = FarmData(
+      farmerName: farmerName,
+      country: 'Lebanon',
+      city: city,
+      detailedLocation: detailedLocation,
+      landArea: area,
+      crop: selectedCrop!,
+      soilType: selectedSoil!,
+      irrigationMethod: selectedIrrigation!,
+    );
+
+    // Crop Translations
     final cropNames = {
       'Tomato': tr('Tomato', 'بندورة'),
       'Potato': tr('Potato', 'بطاطا'),
@@ -204,12 +218,14 @@ class _FarmPageState extends State<FarmPage> {
       'Pepper': tr('Pepper', 'فلفل'),
     };
 
+    // Soil Translations
     final soilNames = {
       'Sandy Soil': tr('Sandy Soil', 'تربة رملية'),
       'Clay Soil': tr('Clay Soil', 'تربة طينية'),
       'Loamy Soil': tr('Loamy Soil', 'تربة طميية'),
     };
 
+    // Irrigation Translations
     final irrigationNames = {
       'Drip Irrigation': tr('Drip Irrigation', 'الري بالتنقيط'),
       'Sprinkler Irrigation': tr('Sprinkler Irrigation', 'الري بالرش'),
@@ -224,14 +240,14 @@ class _FarmPageState extends State<FarmPage> {
             tr('Farm Created Successfully! 🌱', 'تم إنشاء المزرعة بنجاح! 🌱'),
           ),
           content: Text(
-            '${tr('Farmer', 'المزارع')}: $farmerName\n'
+            '${tr('Farmer', 'المزارع')}: ${farmData.farmerName}\n'
             '${tr('Country', 'البلد')}: ${tr('Lebanon', 'لبنان')}\n'
-            '${tr('City / Village', 'المدينة / القرية')}: $city\n'
-            '${tr('Area / Street', 'المنطقة / الشارع')}: $detailedLocation\n'
-            '${tr('Land Area', 'مساحة الأرض')}: $area m²\n'
-            '${tr('Crop', 'المحصول')}: ${cropNames[selectedCrop]}\n'
-            '${tr('Soil', 'التربة')}: ${soilNames[selectedSoil]}\n'
-            '${tr('Irrigation', 'الري')}: ${irrigationNames[selectedIrrigation]}',
+            '${tr('City / Village', 'المدينة / القرية')}: ${farmData.city}\n'
+            '${tr('Area / Street', 'المنطقة / الشارع')}: ${farmData.detailedLocation}\n'
+            '${tr('Land Area', 'مساحة الأرض')}: ${farmData.landArea} m²\n'
+            '${tr('Crop', 'المحصول')}: ${cropNames[farmData.crop]}\n'
+            '${tr('Soil', 'التربة')}: ${soilNames[farmData.soilType]}\n'
+            '${tr('Irrigation', 'الري')}: ${irrigationNames[farmData.irrigationMethod]}',
           ),
           actions: [
             TextButton(
@@ -280,6 +296,7 @@ class _FarmPageState extends State<FarmPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // App Description
                   Center(
                     child: Text(
                       tr('Smart Farming Assistant', 'مساعد الزراعة الذكية'),
@@ -339,7 +356,9 @@ class _FarmPageState extends State<FarmPage> {
                       ),
                     ),
                     child: Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: isArabic
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: Text(tr('Lebanon', 'لبنان')),
                     ),
                   ),
@@ -353,6 +372,7 @@ class _FarmPageState extends State<FarmPage> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: cityController,
+                    textAlign: isArabic ? TextAlign.right : TextAlign.left,
                     decoration: InputDecoration(
                       hintText: tr('Example: Tripoli', 'مثال: طرابلس'),
                       filled: true,
@@ -373,6 +393,7 @@ class _FarmPageState extends State<FarmPage> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: detailedLocationController,
+                    textAlign: isArabic ? TextAlign.right : TextAlign.left,
                     decoration: InputDecoration(
                       hintText: tr(
                         'Example: Dam w Farez, Street name',
@@ -457,15 +478,15 @@ class _FarmPageState extends State<FarmPage> {
                     ),
                     hint: Text(tr('Choose soil type', 'اختر نوع التربة')),
                     items: [
-                      DropdownMenuItem(
+                      DropdownMenuItem<String>(
                         value: 'Sandy Soil',
                         child: Text(tr('Sandy Soil', 'تربة رملية')),
                       ),
-                      DropdownMenuItem(
+                      DropdownMenuItem<String>(
                         value: 'Clay Soil',
                         child: Text(tr('Clay Soil', 'تربة طينية')),
                       ),
-                      DropdownMenuItem(
+                      DropdownMenuItem<String>(
                         value: 'Loamy Soil',
                         child: Text(tr('Loamy Soil', 'تربة طميية')),
                       ),
@@ -537,7 +558,7 @@ class _FarmPageState extends State<FarmPage> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Create Farm Button
+                  // Create My Farm Button
                   SizedBox(
                     width: double.infinity,
                     height: 55,
