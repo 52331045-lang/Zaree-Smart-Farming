@@ -8,6 +8,13 @@ class FarmPage extends StatefulWidget {
 }
 
 class _FarmPageState extends State<FarmPage> {
+  // Language
+  bool isArabic = false;
+
+  String tr(String english, String arabic) {
+    return isArabic ? arabic : english;
+  }
+
   // Text Controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
@@ -29,6 +36,27 @@ class _FarmPageState extends State<FarmPage> {
     super.dispose();
   }
 
+  // Language Buttons
+  Widget languageButton(String label, bool arabic) {
+    bool isSelected = isArabic == arabic;
+
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          isArabic = arabic;
+        });
+      },
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: isSelected
+            ? const Color(0xFF24552D)
+            : Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+      ),
+      child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+    );
+  }
+
   // Show Error Message
   void showError(String message) {
     ScaffoldMessenger.of(context)
@@ -36,7 +64,7 @@ class _FarmPageState extends State<FarmPage> {
   }
 
   // Crop Selection Card
-  Widget buildCropCard(String crop, String emoji) {
+  Widget buildCropCard(String crop, String arabicCrop, String emoji) {
     bool isSelected = selectedCrop == crop;
 
     return GestureDetector(
@@ -66,7 +94,7 @@ class _FarmPageState extends State<FarmPage> {
                 Text(emoji, style: const TextStyle(fontSize: 27)),
                 const SizedBox(height: 6),
                 Text(
-                  crop,
+                  tr(crop, arabicCrop),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 11,
@@ -101,65 +129,116 @@ class _FarmPageState extends State<FarmPage> {
     // Farmer Name Validation
     if (farmerName.isEmpty ||
         !RegExp(r'[a-zA-Z\u0600-\u06FF]').hasMatch(farmerName)) {
-      showError('Please enter a valid farmer name!');
+      showError(
+        tr('Please enter a valid farmer name!', 'يرجى إدخال اسم مزارع صحيح!'),
+      );
       return;
     }
 
     // City Validation
     if (city.isEmpty) {
-      showError('Please enter your city or village!');
+      showError(
+        tr(
+          'Please enter your city or village!',
+          'يرجى إدخال اسم المدينة أو القرية!',
+        ),
+      );
       return;
     }
 
     // Detailed Location Validation
     if (detailedLocation.isEmpty) {
-      showError('Please enter your area or street!');
+      showError(
+        tr(
+          'Please enter your area or street!',
+          'يرجى إدخال المنطقة أو الشارع!',
+        ),
+      );
       return;
     }
 
     // Land Area Validation
     if (areaText.isEmpty) {
-      showError('Please enter your land area!');
+      showError(tr('Please enter your land area!', 'يرجى إدخال مساحة الأرض!'));
       return;
     }
 
     final area = double.tryParse(areaText);
 
     if (area == null || !area.isFinite || area <= 0) {
-      showError('Enter a valid positive area, such as 100 or 25.5!');
+      showError(
+        tr(
+          'Enter a valid positive area, such as 100 or 25.5!',
+          'يرجى إدخال مساحة صحيحة مثل 100 أو 25.5!',
+        ),
+      );
       return;
     }
 
-    // Crop, Soil and Irrigation Validation
-    if (selectedCrop == null ||
-        selectedSoil == null ||
-        selectedIrrigation == null) {
-      showError('Please select crop, soil and irrigation method!');
+    // Crop Validation
+    if (selectedCrop == null) {
+      showError(tr('Please select a crop!', 'يرجى اختيار محصول!'));
       return;
     }
+
+    // Soil Validation
+    if (selectedSoil == null) {
+      showError(tr('Please select soil type!', 'يرجى اختيار نوع التربة!'));
+      return;
+    }
+
+    // Irrigation Validation
+    if (selectedIrrigation == null) {
+      showError(
+        tr('Please select irrigation method!', 'يرجى اختيار طريقة الري!'),
+      );
+      return;
+    }
+
+    // Translated Values
+    final cropNames = {
+      'Tomato': tr('Tomato', 'بندورة'),
+      'Potato': tr('Potato', 'بطاطا'),
+      'Cucumber': tr('Cucumber', 'خيار'),
+      'Lettuce': tr('Lettuce', 'خس'),
+      'Pepper': tr('Pepper', 'فلفل'),
+    };
+
+    final soilNames = {
+      'Sandy Soil': tr('Sandy Soil', 'تربة رملية'),
+      'Clay Soil': tr('Clay Soil', 'تربة طينية'),
+      'Loamy Soil': tr('Loamy Soil', 'تربة طميية'),
+    };
+
+    final irrigationNames = {
+      'Drip Irrigation': tr('Drip Irrigation', 'الري بالتنقيط'),
+      'Sprinkler Irrigation': tr('Sprinkler Irrigation', 'الري بالرش'),
+    };
 
     // Successful Farm Creation
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Farm Created Successfully! 🌱'),
+          title: Text(
+            tr('Farm Created Successfully! 🌱', 'تم إنشاء المزرعة بنجاح! 🌱'),
+          ),
           content: Text(
-            'Farmer: $farmerName\n'
-            'Country: Lebanon\n'
-            'City / Village: $city\n'
-            'Area / Street: $detailedLocation\n'
-            'Land Area: $area m²\n'
-            'Crop: $selectedCrop\n'
-            'Soil: $selectedSoil\n'
-            'Irrigation: $selectedIrrigation',
+            '${tr('Farmer', 'المزارع')}: $farmerName\n'
+            '${tr('Country', 'البلد')}: ${tr('Lebanon', 'لبنان')}\n'
+            '${tr('City / Village', 'المدينة / القرية')}: $city\n'
+            '${tr('Area / Street', 'المنطقة / الشارع')}: $detailedLocation\n'
+            '${tr('Land Area', 'مساحة الأرض')}: $area m²\n'
+            '${tr('Crop', 'المحصول')}: ${cropNames[selectedCrop]}\n'
+            '${tr('Soil', 'التربة')}: ${soilNames[selectedSoil]}\n'
+            '${tr('Irrigation', 'الري')}: ${irrigationNames[selectedIrrigation]}',
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('OK'),
+              child: Text(tr('OK', 'حسناً')),
             ),
           ],
         );
@@ -169,279 +248,320 @@ class _FarmPageState extends State<FarmPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Zaree 🌱'),
-        backgroundColor: const Color(0xFF2E7137),
-        foregroundColor: Colors.white,
-      ),
-      body: Container(
-        color: const Color(0xFFFFF8E9),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Center(
-                  child: Text(
-                    'Smart Farming Assistant',
-                    style: TextStyle(
-                      fontSize: 16,
+    return Directionality(
+      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Zaree 🌱'),
+          backgroundColor: const Color(0xFF2E7137),
+          foregroundColor: Colors.white,
+          actions: [
+            Container(
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white54),
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  languageButton('EN', false),
+                  languageButton('عربي', true),
+                ],
+              ),
+            ),
+          ],
+        ),
+        body: Container(
+          color: const Color(0xFFFFF8E9),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      tr('Smart Farming Assistant', 'مساعد الزراعة الذكية'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF24552D),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // My Farm Title
+                  Text(
+                    tr('My Farm | 🌱', 'مزرعتي | 🌱'),
+                    style: const TextStyle(
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
                       color: Color(0xFF24552D),
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // My Farm Title
-                const Text(
-                  'My Farm | أرضي 🌱',
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF24552D),
+                  // Farmer Name
+                  Text(
+                    tr('Farmer Name', 'اسم المزارع'),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 20),
-
-                // Farmer Name
-                const Text(
-                  'Farmer Name | اسم المزارع',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter your name',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.person),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Country
-                const Text(
-                  'Country | البلد',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                InputDecorator(
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    prefixIcon: const Icon(Icons.flag),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      hintText: tr('Enter your name', 'أدخل اسمك'),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.person),
                     ),
                   ),
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Lebanon'),
-                  ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // City or Village
-                const Text(
-                  'City / Village | المدينة أو القرية',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: cityController,
-                  decoration: InputDecoration(
-                    hintText: 'Example: Tripoli',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  // Country
+                  Text(
+                    tr('Country', 'البلد'),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  InputDecorator(
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: const Icon(Icons.flag),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    prefixIcon: const Icon(Icons.location_city),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Detailed Location
-                const Text(
-                  'Area / Street | المنطقة أو الشارع',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: detailedLocationController,
-                  decoration: InputDecoration(
-                    hintText: 'Example: Dam w Farez, Street name',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(tr('Lebanon', 'لبنان')),
                     ),
-                    prefixIcon: const Icon(Icons.location_on),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // Land Area
-                const Text(
-                  'Land Area | مساحة الأرض',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: areaController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
+                  // City / Village
+                  Text(
+                    tr('City / Village', 'المدينة / القرية'),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  decoration: InputDecoration(
-                    hintText: 'Enter land area',
-                    suffixText: 'm²',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: cityController,
+                    decoration: InputDecoration(
+                      hintText: tr('Example: Tripoli', 'مثال: طرابلس'),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.location_city),
                     ),
-                    prefixIcon: const Icon(Icons.landscape),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // Crop Selection
-                const Text(
-                  'Select Crop | اختر المحصول',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(child: buildCropCard('Tomato', '🍅')),
-                    const SizedBox(width: 6),
-                    Expanded(child: buildCropCard('Potato', '🥔')),
-                    const SizedBox(width: 6),
-                    Expanded(child: buildCropCard('Cucumber', '🥒')),
-                    const SizedBox(width: 6),
-                    Expanded(child: buildCropCard('Lettuce', '🥬')),
-                    const SizedBox(width: 6),
-                    Expanded(child: buildCropCard('Pepper', '🌶️')),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Soil Type
-                const Text(
-                  'Soil Type | نوع التربة',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF24552D),
+                  // Detailed Location
+                  Text(
+                    tr('Area / Street', 'المنطقة / الشارع'),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: selectedSoil,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: detailedLocationController,
+                    decoration: InputDecoration(
+                      hintText: tr(
+                        'Example: Dam w Farez, Street name',
+                        'مثال: ضم وفرز، اسم الشارع',
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.location_on),
                     ),
-                    prefixIcon: const Icon(Icons.terrain),
                   ),
-                  hint: const Text('Choose soil type'),
-                  items: ['Sandy Soil', 'Clay Soil', 'Loamy Soil'].map((soil) {
-                    return DropdownMenuItem<String>(
-                      value: soil,
-                      child: Text(soil),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedSoil = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // Irrigation Method
-                const Text(
-                  'Irrigation Method | طريقة الري',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Color(0xFF24552D),
+                  // Land Area
+                  Text(
+                    tr('Land Area', 'مساحة الأرض'),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF5DF),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFD8CBA8)),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: areaController,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: tr('Enter land area', 'أدخل مساحة الأرض'),
+                      suffixText: 'm²',
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.landscape),
+                    ),
                   ),
-                  child: Column(
+                  const SizedBox(height: 20),
+
+                  // Crop Selection
+                  Text(
+                    tr('Select Crop', 'اختر المحصول'),
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
                     children: [
-                      RadioListTile<String>(
-                        value: 'Drip Irrigation',
-                        groupValue: selectedIrrigation,
-                        activeColor: const Color(0xFF2E7137),
-                        title: const Text('Drip Irrigation'),
-                        subtitle: const Text(
-                          'Water delivered directly to plant roots',
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedIrrigation = value;
-                          });
-                        },
-                      ),
-                      const Divider(),
-                      RadioListTile<String>(
-                        value: 'Sprinkler Irrigation',
-                        groupValue: selectedIrrigation,
-                        activeColor: const Color(0xFF2E7137),
-                        title: const Text('Sprinkler Irrigation'),
-                        subtitle: const Text('Water sprayed over the crops'),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedIrrigation = value;
-                          });
-                        },
-                      ),
+                      Expanded(child: buildCropCard('Tomato', 'بندورة', '🍅')),
+                      const SizedBox(width: 6),
+                      Expanded(child: buildCropCard('Potato', 'بطاطا', '🥔')),
+                      const SizedBox(width: 6),
+                      Expanded(child: buildCropCard('Cucumber', 'خيار', '🥒')),
+                      const SizedBox(width: 6),
+                      Expanded(child: buildCropCard('Lettuce', 'خس', '🥬')),
+                      const SizedBox(width: 6),
+                      Expanded(child: buildCropCard('Pepper', 'فلفل', '🌶️')),
                     ],
                   ),
-                ),
-                const SizedBox(height: 30),
+                  const SizedBox(height: 20),
 
-                // Create My Farm Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: createFarm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E7137),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                  // Soil Type
+                  Text(
+                    tr('Soil Type', 'نوع التربة'),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF24552D),
                     ),
-                    child: const Text(
-                      '🌱 Create My Farm | إنشاء أرضي',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: selectedSoil,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.terrain),
+                    ),
+                    hint: Text(tr('Choose soil type', 'اختر نوع التربة')),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'Sandy Soil',
+                        child: Text(tr('Sandy Soil', 'تربة رملية')),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Clay Soil',
+                        child: Text(tr('Clay Soil', 'تربة طينية')),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Loamy Soil',
+                        child: Text(tr('Loamy Soil', 'تربة طميية')),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedSoil = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Irrigation Method
+                  Text(
+                    tr('Irrigation Method', 'طريقة الري'),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF24552D),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF5DF),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFD8CBA8)),
+                    ),
+                    child: Column(
+                      children: [
+                        RadioListTile<String>(
+                          value: 'Drip Irrigation',
+                          groupValue: selectedIrrigation,
+                          activeColor: const Color(0xFF2E7137),
+                          title: Text(tr('Drip Irrigation', 'الري بالتنقيط')),
+                          subtitle: Text(
+                            tr(
+                              'Water delivered directly to plant roots',
+                              'يصل الماء مباشرة إلى جذور النباتات',
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedIrrigation = value;
+                            });
+                          },
+                        ),
+                        const Divider(),
+                        RadioListTile<String>(
+                          value: 'Sprinkler Irrigation',
+                          groupValue: selectedIrrigation,
+                          activeColor: const Color(0xFF2E7137),
+                          title: Text(tr('Sprinkler Irrigation', 'الري بالرش')),
+                          subtitle: Text(
+                            tr(
+                              'Water sprayed over the crops',
+                              'يتم رش الماء فوق المحاصيل',
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedIrrigation = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+
+                  // Create Farm Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton(
+                      onPressed: createFarm,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E7137),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Text(
+                        tr('🌱 Create My Farm', '🌱 أنشئ مزرعتي'),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
